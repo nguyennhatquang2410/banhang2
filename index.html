@@ -410,6 +410,10 @@
                     <input type="text" id="sp-ten" class="form-control" required placeholder="Nhập tên sản phẩm" />
                 </div>
                 <div class="mb-3">
+                    <label for="sp-gia-nhap" class="form-label">Giá nhập:</label>
+                    <input type="number" id="sp-gia-nhap" class="form-control" min="0" required placeholder="Nhập giá nhập" />
+                </div>
+                <div class="mb-3">
                     <label for="sp-gia" class="form-label">Giá bán:</label>
                     <input type="number" id="sp-gia" class="form-control" min="0" required placeholder="Nhập giá bán" />
                 </div>
@@ -427,7 +431,7 @@
             <div class="table-responsive">
                 <table id="table-sanpham" class="table table-striped table-hover">
                     <thead>
-                        <tr><th>Barcode</th><th>Tên sản phẩm</th><th>Giá bán</th></tr>
+                        <tr><th>Barcode</th><th>Tên sản phẩm</th><th>Giá nhập</th><th>Giá bán</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -451,9 +455,18 @@
                         <input type="text" id="ten-sp-nh" class="form-control" placeholder="Nhập tên sản phẩm" />
                     </div>
                     <div class="mb-3">
+                        <label for="gia-nhap-sp-nh" class="form-label">Giá nhập (VNĐ):</label>
+                        <input type="number" id="gia-nhap-sp-nh" class="form-control" placeholder="Nhập giá nhập" min="0" />
+                    </div>
+                    <div class="mb-3">
                         <label for="gia-sp-nh" class="form-label">Giá bán (VNĐ):</label>
                         <input type="number" id="gia-sp-nh" class="form-control" placeholder="Nhập giá bán" min="0" />
                     </div>
+                </div>
+                
+                <div id="hien-thi-gia-nhap-nh" class="mb-3" style="display:none;">
+                    <label for="nh-gia-nhap" class="form-label">Giá nhập hiện tại:</label>
+                    <input type="number" id="nh-gia-nhap" class="form-control" min="0" placeholder="Giá nhập" />
                 </div>
 
                 <div class="mb-3">
@@ -501,8 +514,8 @@
     <script>
         // --- Dữ liệu ---
         let sanphamList = [
-            { barcode: '001', ten: 'Sản phẩm A', gia: 100000 },
-            { barcode: '002', ten: 'Sản phẩm B', gia: 200000 },
+            { barcode: '001', ten: 'Sản phẩm A', gia: 100000, giaNhap: 80000 },
+            { barcode: '002', ten: 'Sản phẩm B', gia: 200000, giaNhap: 150000 },
         ];
         let donHangHienTai = [];
         let danhSachDon = [];
@@ -555,6 +568,7 @@
         const inputBarcode = document.getElementById('sp-barcode');
         const inputTen = document.getElementById('sp-ten');
         const inputGia = document.getElementById('sp-gia');
+        const inputGiaNhap = document.getElementById('sp-gia-nhap');
         const btnXoaSP = document.getElementById('btn-xoa-sp');
         const tbodySanPham = document.querySelector('#table-sanpham tbody');
         const spSearchInput = document.getElementById('sp-search');
@@ -577,6 +591,7 @@
                 tr.innerHTML = `
                     <td>${sp.barcode}</td>
                     <td>${sp.ten}</td>
+                    <td>${formatCurrencyForDisplay(sp.giaNhap || 0)}</td>
                     <td>${formatCurrencyForDisplay(sp.gia)}</td>
                 `;
                 tr.style.cursor = 'pointer';
@@ -584,6 +599,7 @@
                     inputBarcode.value = sp.barcode;
                     inputTen.value = sp.ten;
                     inputGia.value = sp.gia;
+                    inputGiaNhap.value = sp.giaNhap || 0;
                     barcodeDangSua = sp.barcode; // Cập nhật barcodeDangSua khi chọn sản phẩm
                     btnXoaSP.style.display = 'inline-block';
                 });
@@ -597,6 +613,7 @@
             if (!barcode) {
                 inputTen.value = '';
                 inputGia.value = '';
+                inputGiaNhap.value = '';
                 barcodeDangSua = null;
                 btnXoaSP.style.display = 'none';
                 return;
@@ -605,11 +622,13 @@
             if (sp) {
                 inputTen.value = sp.ten;
                 inputGia.value = sp.gia;
+                inputGiaNhap.value = sp.giaNhap || 0;
                 barcodeDangSua = sp.barcode;
                 btnXoaSP.style.display = 'inline-block';
             } else {
                 inputTen.value = '';
                 inputGia.value = '';
+                inputGiaNhap.value = '';
                 barcodeDangSua = null;
                 btnXoaSP.style.display = 'none';
             }
@@ -624,7 +643,8 @@
             const barcode = inputBarcode.value.trim();
             const ten = inputTen.value.trim();
             const gia = parseInt(inputGia.value);
-            if (!barcode || !ten || isNaN(gia) || gia < 0) {
+            const giaNhap = parseInt(inputGiaNhap.value);
+            if (!barcode || !ten || isNaN(gia) || gia < 0 || isNaN(giaNhap)) {
                 alert('Vui lòng nhập đầy đủ thông tin hợp lệ!');
                 return;
             }
@@ -635,6 +655,7 @@
                 if (index !== -1) {
                     sanphamList[index].ten = ten;
                     sanphamList[index].gia = gia;
+                    sanphamList[index].giaNhap = giaNhap;
                     alert('Cập nhật sản phẩm thành công!');
                 }
             } else {
@@ -643,7 +664,7 @@
                     alert('Barcode đã tồn tại, vui lòng sửa hoặc nhập barcode khác!');
                     return;
                 }
-                sanphamList.push({ barcode, ten, gia });
+                sanphamList.push({ barcode, ten, gia, giaNhap });
                 alert('Thêm sản phẩm mới thành công!');
             }
             formSanPham.reset();
@@ -729,7 +750,7 @@
                     alert('Vui lòng nhập giá bán hợp lệ!');
                     return;
                 }
-                sp = { barcode, ten: tenThuCong, gia: giaThuCong };
+                sp = { barcode, ten: tenThuCong, gia: giaThuCong, giaNhap: 0 };
             }
 
             // Kiểm tra xem sản phẩm này đã có trong đơn chưa, cộng dồn số lượng
@@ -836,27 +857,34 @@
         const nhBarcodeInput = document.getElementById('nh-barcode');
         const tenSPNhapInput = document.getElementById('ten-sp-nh');
         const giaSPNhapInput = document.getElementById('gia-sp-nh');
+        const giaNhapSPNhapInput = document.getElementById('gia-nhap-sp-nh');
         const nhapThongTinSPNhapDiv = document.getElementById('nhap-thongtin-sp-nh');
         const nhSoLuongInput = document.getElementById('nh-soluong');
+        const nhGiaNhapVuaSuaInput = document.getElementById('nh-gia-nhap');
+        const hienThiGiaNhapNh = document.getElementById('hien-thi-gia-nhap-nh');
         const tbodyNhapHang = document.querySelector('#table-nhaphang tbody');
 
         nhBarcodeInput.addEventListener('input', () => {
             const barcode = nhBarcodeInput.value.trim();
             if (!barcode) {
                 nhapThongTinSPNhapDiv.style.display = 'none';
+                hienThiGiaNhapNh.style.display = 'none';
                 tenSPNhapInput.value = '';
                 giaSPNhapInput.value = '';
+                giaNhapSPNhapInput.value = '';
                 return;
             }
             const sp = sanphamList.find(sp => sp.barcode === barcode);
             if (sp) {
                 nhapThongTinSPNhapDiv.style.display = 'none';
-                tenSPNhapInput.value = sp.ten; // Hiển thị tên nếu barcode đã tồn tại
-                giaSPNhapInput.value = sp.gia; // Hiển thị giá nếu barcode đã tồn tại
+                hienThiGiaNhapNh.style.display = 'block';
+                nhGiaNhapVuaSuaInput.value = sp.giaNhap || 0;
             } else {
                 nhapThongTinSPNhapDiv.style.display = 'block';
+                hienThiGiaNhapNh.style.display = 'none';
                 tenSPNhapInput.value = ''; // Xóa nếu không tìm thấy
                 giaSPNhapInput.value = ''; // Xóa nếu không tìm thấy
+                giaNhapSPNhapInput.value = '';
             }
         });
 
@@ -880,24 +908,29 @@
             if (!sp) {
                 const tenThuCong = tenSPNhapInput.value.trim();
                 const giaThuCong = parseInt(giaSPNhapInput.value);
+                const giaNhapThuCong = parseInt(giaNhapSPNhapInput.value);
 
                 if (!tenThuCong) {
                     alert('Vui lòng nhập tên sản phẩm thủ công!');
                     return;
                 }
-                if (isNaN(giaThuCong) || giaThuCong < 0) {
-                    alert('Vui lòng nhập giá bán hợp lệ!');
+                if (isNaN(giaThuCong) || giaThuCong < 0 || isNaN(giaNhapThuCong)) {
+                    alert('Vui lòng nhập giá bán và giá nhập hợp lệ!');
                     return;
                 }
-                sp = { barcode, ten: tenThuCong, gia: giaThuCong };
+                sp = { barcode, ten: tenThuCong, gia: giaThuCong, giaNhap: giaNhapThuCong };
                 sanphamList.push(sp);
                 renderSanPham();
+            } else {
+                // Cập nhật lại giá nhập mới nhất cho sản phẩm
+                sp.giaNhap = parseInt(nhGiaNhapVuaSuaInput.value) || 0;
             }
 
             nhapHangList.push({
                 barcode,
                 ten: sp.ten,
                 soluong,
+                giaNhap: sp.giaNhap,
                 ngayNhap: new Date().toLocaleString(),
             });
 
@@ -906,6 +939,7 @@
 
             formNhapHang.reset();
             nhapThongTinSPNhapDiv.style.display = 'none';
+            hienThiGiaNhapNh.style.display = 'none';
             tenSPNhapInput.value = '';
             giaSPNhapInput.value = '';
             nhBarcodeInput.value = ''; // Clear barcode input after adding
@@ -1019,25 +1053,13 @@
         }
 
         function tinhLoiNhuan() {
-            const giaNhapTB = {};
-            const tongSLNhap = {};
-            nhapHangList.forEach(nh => {
-                if (!giaNhapTB[nh.barcode]) {
-                    giaNhapTB[nh.barcode] = 0;
-                    tongSLNhap[nh.barcode] = 0;
-                }
-                const sp = sanphamList.find(s => s.barcode === nh.barcode);
-                const giaNhap = sp ? sp.gia : 0; // Giả sử giá nhập bằng giá bán nếu không có giá nhập riêng
-                // Tính giá nhập trung bình
-                giaNhapTB[nh.barcode] = (giaNhapTB[nh.barcode] * tongSLNhap[nh.barcode] + nh.soluong * giaNhap) / (tongSLNhap[nh.barcode] + nh.soluong);
-                tongSLNhap[nh.barcode] += nh.soluong;
-            });
-
+            // Lấy giá vốn dựa trên giá nhập trong sanphamList
             let tongGiaVon = 0;
             danhSachDon.forEach(don => {
                 don.items.forEach(item => {
-                    const avgNhap = giaNhapTB[item.barcode] || 0;
-                    tongGiaVon += item.soluong * avgNhap;
+                    const sp = sanphamList.find(s => s.barcode === item.barcode);
+                    const cost = sp ? (sp.giaNhap || 0) : 0;
+                    tongGiaVon += item.soluong * cost;
                 });
             });
 
