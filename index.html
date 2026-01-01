@@ -129,8 +129,8 @@
         });
 
         // Dữ liệu
-        let nhapHangList = JSON.parse(localStorage.getItem('nhapHangList')) || [];
-        let lichSuXuat = JSON.parse(localStorage.getItem('lichSuXuat')) || [];
+        let nhapHangList = JSON.parse(localStorage.getItem('nhapHangList1')) || [];
+        let lichSuXuat = JSON.parse(localStorage.getItem('lichSuXuat1')) || [];
         let tempXuat = [];
 
         // Logic Barcode
@@ -194,7 +194,7 @@
                 else lichSuXuat.push({...tx, date: new Date().toLocaleString()});
             });
 
-            localStorage.setItem('lichSuXuat', JSON.stringify(lichSuXuat));
+            localStorage.setItem('lichSuXuat1', JSON.stringify(lichSuXuat));
             tempXuat = [];
             saveData();
             renderXuat();
@@ -202,7 +202,7 @@
         };
 
         function saveData() {
-            localStorage.setItem('nhapHangList', JSON.stringify(nhapHangList));
+            localStorage.setItem('nhapHangList1', JSON.stringify(nhapHangList));
             renderNH();
         }
 
