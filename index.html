@@ -119,12 +119,18 @@
             <form id="form-xuathang">
                 <input type="hidden" id="edit-idx-xh" value="">
 <div class="mb-3">
-    <label class="form-label fw-bold">Chọn sản phẩm xuất:</label>
-    <select id="xh-select-sp" class="form-select border-danger">
-        <option value="">-- Chọn sản phẩm trong kho --</option>
-    </select>
-    <input type="hidden" id="xh-barcode"> 
-</div>
+            <label class="form-label fw-bold">Chọn sản phẩm xuất:</label>
+            <select id="xh-select-sp" class="form-select border-danger mb-3">
+                <option value="">-- Chọn sản phẩm trong kho --</option>
+            </select>
+
+            <label class="form-label fw-bold">Hoặc quét mã Barcode:</label>
+            <div class="input-group">
+                <input type="text" id="xh-barcode" class="form-control border-danger" placeholder="Mã sản phẩm...">
+                <button type="button" id="btn-mo-camera-xh" class="btn btn-danger"><i class="fas fa-qrcode"></i></button>
+            </div>
+            <div id="camera-area-xh" class="camera-area"></div>
+        </div>
 
                 <div id="nhap-thongtin-sp-xh" style="display:none;" class="mt-3 p-3 bg-danger-subtle border border-danger rounded">
                     <div class="mb-3">
@@ -179,6 +185,9 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <script>
+        const navLinks = document.querySelectorAll('.nav-link');
+        const menuCollapse = document.getElementById('navbarNav');
+        const bsCollapse = new bootstrap.Collapse(menuCollapse, {toggle: false});
 function updateSelectXuatHang() {
     const select = document.getElementById('xh-select-sp');
     // Xóa danh sách cũ, giữ lại dòng đầu tiên
@@ -204,9 +213,6 @@ document.getElementById('xh-select-sp').addEventListener('change', function() {
         document.getElementById('nhap-thongtin-sp-xh').style.display = 'none';
     }
 });
-        const navLinks = document.querySelectorAll('.nav-link');
-        const menuCollapse = document.getElementById('navbarNav');
-        const bsCollapse = new bootstrap.Collapse(menuCollapse, {toggle: false});
 
         navLinks.forEach(link => {
             link.addEventListener('click', function(e) {
@@ -219,7 +225,7 @@ document.getElementById('xh-select-sp').addEventListener('change', function() {
             });
         });
 
-        let nhapHangList = JSON.parse(localStorage.getItem('nhapHangList1')) || [];
+        let nhapHangList = JSON.parse(localStorage.getItem('nhapHangList')) || [];
         let tempXuat = [];
 
         const handleScanInput = (inputId, infoId, tenId) => {
@@ -383,9 +389,9 @@ document.getElementById('xh-select-sp').addEventListener('change', function() {
         };
 
         function saveAndRender() {
-            localStorage.setItem('nhapHangList1', JSON.stringify(nhapHangList));
+            localStorage.setItem('nhapHangList', JSON.stringify(nhapHangList));
             renderNH();
-	    updateSelectXuatHang();
+updateSelectXuatHang();
         }
 
         function renderNH() {
@@ -443,7 +449,7 @@ document.getElementById('xh-select-sp').addEventListener('change', function() {
         };
 
         renderNH();
-	updateSelectXuatHang();
+updateSelectXuatHang();
     </script>
 </body>
 </html>
