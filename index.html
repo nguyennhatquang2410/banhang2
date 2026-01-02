@@ -185,6 +185,22 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <script>
+// ===== SINGLE SOURCE OF TRUTH =====
+const STORAGE_KEY = 'nhapHangList1';
+
+const StorageNH = {
+    load() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        } catch {
+            return [];
+        }
+    },
+    save(data) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+};
+
         const navLinks = document.querySelectorAll('.nav-link');
         const menuCollapse = document.getElementById('navbarNav');
         const bsCollapse = new bootstrap.Collapse(menuCollapse, {toggle: false});
@@ -225,7 +241,7 @@ document.getElementById('xh-select-sp').addEventListener('change', function() {
             });
         });
 
-        let nhapHangList = JSON.parse(localStorage.getItem('nhapHangList')) || [];
+        let nhapHangList = StorageNH.load();
         let tempXuat = [];
 
         const handleScanInput = (inputId, infoId, tenId) => {
@@ -389,7 +405,8 @@ document.getElementById('xh-select-sp').addEventListener('change', function() {
         };
 
         function saveAndRender() {
-            localStorage.setItem('nhapHangList', JSON.stringify(nhapHangList));
+            StorageNH.save(nhapHangList);
+
             renderNH();
 updateSelectXuatHang();
         }
