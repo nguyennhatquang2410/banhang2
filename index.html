@@ -118,14 +118,13 @@
             <h2 class="xuat-title"><i class="fas fa-box-open"></i> Xuất hàng & Tạo phiếu</h2>
             <form id="form-xuathang">
                 <input type="hidden" id="edit-idx-xh" value="">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Quét mã xuất:</label>
-                    <div class="input-group">
-                        <input type="text" id="xh-barcode" class="form-control border-danger" placeholder="Mã sản phẩm...">
-                        <button type="button" id="btn-mo-camera-xh" class="btn btn-danger"><i class="fas fa-qrcode"></i></button>
-                    </div>
-                    <div id="camera-area-xh" class="camera-area"></div>
-                </div>
+<div class="mb-3">
+    <label class="form-label fw-bold">Chọn sản phẩm xuất:</label>
+    <select id="xh-select-sp" class="form-select border-danger">
+        <option value="">-- Chọn sản phẩm trong kho --</option>
+    </select>
+    <input type="hidden" id="xh-barcode"> 
+</div>
 
                 <div id="nhap-thongtin-sp-xh" style="display:none;" class="mt-3 p-3 bg-danger-subtle border border-danger rounded">
                     <div class="mb-3">
@@ -180,6 +179,31 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <script>
+function updateSelectXuatHang() {
+    const select = document.getElementById('xh-select-sp');
+    // Xóa danh sách cũ, giữ lại dòng đầu tiên
+    select.innerHTML = '<option value="">-- Chọn sản phẩm trong kho --</option>';
+    
+    nhapHangList.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.barcode;
+        option.text = `${item.ten} (Tồn: ${item.soluong})`;
+        select.appendChild(option);
+    });
+}
+
+// Lắng nghe sự kiện khi người dùng chọn sản phẩm từ danh sách
+document.getElementById('xh-select-sp').addEventListener('change', function() {
+    const selectedBarcode = this.value;
+    const found = nhapHangList.find(i => i.barcode === selectedBarcode);
+    if (found) {
+        document.getElementById('xh-barcode').value = found.barcode;
+        document.getElementById('ten-sp-xh').value = found.ten;
+        document.getElementById('nhap-thongtin-sp-xh').style.display = 'block';
+    } else {
+        document.getElementById('nhap-thongtin-sp-xh').style.display = 'none';
+    }
+});
         const navLinks = document.querySelectorAll('.nav-link');
         const menuCollapse = document.getElementById('navbarNav');
         const bsCollapse = new bootstrap.Collapse(menuCollapse, {toggle: false});
@@ -195,7 +219,7 @@
             });
         });
 
-        let nhapHangList = JSON.parse(localStorage.getItem('nhapHangList1')) || [];
+        let nhapHangList = JSON.parse(localStorage.getItem('nhapHangList')) || [];
         let tempXuat = [];
 
         const handleScanInput = (inputId, infoId, tenId) => {
@@ -359,8 +383,9 @@
         };
 
         function saveAndRender() {
-            localStorage.setItem('nhapHangList1', JSON.stringify(nhapHangList1));
+            localStorage.setItem('nhapHangList', JSON.stringify(nhapHangList));
             renderNH();
+	    updateSelectXuatHang();
         }
 
         function renderNH() {
@@ -418,6 +443,7 @@
         };
 
         renderNH();
+	updateSelectXuatHang();
     </script>
 </body>
 </html>
